@@ -64,9 +64,6 @@ class Model(tf.keras.Model):
         # shape of filter = (filter_height, filter_width, in_channels, out_channels)
         # shape of strides = (batch_stride, height_stride, width_stride, channels_stride)
 
-        print(inputs.shape)
-        print(self.conv1_filter.shape)
-
         conv1 = tf.nn.conv2d(inputs, self.conv1_filter, strides=[1, 1, 1, 1], padding="SAME")
         conv1 = tf.nn.bias_add(conv1, self.conv1_bias)
         mean1, var1 = tf.nn.moments(conv1, axes=[0, 1, 2])
@@ -117,8 +114,7 @@ class Model(tf.keras.Model):
         :param labels: during training, matrix of shape (batch_size, self.num_classes) containing the train labels
         :return: the loss of the model as a Tensor
         """
-        print(tf.shape(labels))
-        print(tf.shape(logits))
+     
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels, logits))
         return loss
 
@@ -287,7 +283,7 @@ def main():
     LOCAL_TRAIN_FILE = "/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/train"
     LOCAL_TEST_FILE = '/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/test'
 
-    train_inputs, train_labels = get_data(LOCAL_TRAIN_FILE, 3, 5) # tk
+    train_inputs, train_labels = get_data(LOCAL_TRAIN_FILE, 3, 5) 
     test_inputs, test_labels = get_data(LOCAL_TEST_FILE, 3, 5)
 
     model = Model()

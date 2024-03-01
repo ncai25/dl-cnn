@@ -59,10 +59,8 @@ def get_data(file_path, first_class, second_class):
     tf.transpose(inputs, perm=[0,2,3,1])
 
     inputs = (inputs / 255.).astype(np.float32)
+    labels = tf.one_hot(labels, depth=2)
 
     # one_hot_encoded = np.array([self.labels_to_onehot[label] for label in data])
-
-    num_classes = 2
-    tf.one_hot(labels, depth=num_classes)
-
+    
     return inputs, labels
