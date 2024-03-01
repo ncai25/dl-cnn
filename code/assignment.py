@@ -27,6 +27,11 @@ class Model(tf.keras.Model):
 
         # TODO: Initialize all hyperparameters
 
+        self.num_classes = 2 # tk
+        self.learning_rate = 1e-3
+        self.batch_size = 64
+
+
         # TODO: Initialize all trainable parameters
 
     def call(self, inputs, is_testing=False):
@@ -88,7 +93,25 @@ def train(model, train_inputs, train_labels):
     :return: Return the average accuracy across batches of the train inputs/labels
     '''
 
-    pass
+    optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
+
+
+    with tf.GradientTape() as tape:
+        logits = model(train_inputs) # y_pred
+        # Compute the loss value (the loss function is configured in `compile()`)
+        loss = model.loss(logits, train_labels)
+
+    # gradient = tape.gradient(loss, )
+        
+    # accuracy = self.compiled_acc(y_pred, y)
+
+        
+    # gradient = tape.gradient(loss, self.weights)
+    # self.optimizer.apply_gradients(self.weights, gradient)
+
+
+        
+        
 
 def test(model, test_inputs, test_labels):
     """
@@ -192,14 +215,17 @@ def main():
     '''
     # TODO: Use the autograder filepaths to get data before submitting to autograder.
     #       Use the local filepaths when running on your local machine.
+
     AUTOGRADER_TRAIN_FILE = '../data/train'
     AUTOGRADER_TEST_FILE = '../data/test'
 
-    LOCAL_TRAIN_FILE = ...
-    LOCAL_TEST_FILE = ...
+    LOCAL_TRAIN_FILE = "/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/train"
+    LOCAL_TEST_FILE = '/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/test'
 
+    get_data(LOCAL_TRAIN_FILE, 3, 5)
     return
 
 
 if __name__ == '__main__':
     main()
+
