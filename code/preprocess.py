@@ -53,7 +53,9 @@ def get_data(file_path, first_class, second_class):
     inputs = np.array([inputs[index] for index in indices])
     labels = np.array([labels[index] for index in indices])
 
-    inputs = np.reshape(inputs, (-1, 3, 32 ,32))
+    # inputs = np.reshape(inputs, (-1, 3, 32 ,32))
+    inputs = np.reshape(inputs, (-1, 32, 32, 3))
+    
     tf.transpose(inputs, perm=[0,2,3,1])
 
     inputs = (inputs / 255.).astype(np.float32)

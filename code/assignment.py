@@ -21,18 +21,35 @@ class Model(tf.keras.Model):
         """
         super(Model, self).__init__()
 
-        self.batch_size = None
-        self.num_classes = None
+        self.batch_size = 64
+        self.num_classes = 2
         self.loss_list = [] # Append losses to this list in training so you can visualize loss vs time in main
 
         # TODO: Initialize all hyperparameters
-
-        self.num_classes = 2 # tk
         self.learning_rate = 1e-3
-        self.batch_size = 64
-
 
         # TODO: Initialize all trainable parameters
+
+
+        def create_variable(dims):  ## Easy initialization function for you :)
+            return tf.Variable(tf.random.truncated_normal(dims, stddev=.1, dtype=tf.float32))
+
+        self.conv1_filter = create_variable([5,5,3,16])
+        # 5 x 5, 3 input channels, 16 output channels / 16 5x5 filters per channel
+        self.conv1_bias = create_variable([16]) # tf.zeros([16]) #tk
+
+        self.conv2_filter = create_variable([5,5,16,20]) 
+        self.conv2_bias = create_variable([20])
+
+        self.conv3_filter = create_variable([3,3,20,20]) 
+        self.conv3_bias = create_variable([20])
+
+        self.dense1_weight = create_variable([8 * 8 * 20, 128]) #tk
+        self.dense1_bias = create_variable([128])
+        self.dense2_weight = create_variable([128, 16])
+        self.dense2_bias = create_variable([16])
+        self.dense3_weight = create_variable([16, 2])
+        self.dense3_bias = create_variable([2])
 
     def call(self, inputs, is_testing=False):
         """
@@ -47,7 +64,48 @@ class Model(tf.keras.Model):
         # shape of filter = (filter_height, filter_width, in_channels, out_channels)
         # shape of strides = (batch_stride, height_stride, width_stride, channels_stride)
 
-        pass
+        print(inputs.shape)
+        print(self.conv1_filter.shape)
+
+        conv1 = tf.nn.conv2d(inputs, self.conv1_filter, strides=[1, 1, 1, 1], padding="SAME")
+        conv1 = tf.nn.bias_add(conv1, self.conv1_bias)
+        mean1, var1 = tf.nn.moments(conv1, axes=[0, 1, 2])
+        conv1 = tf.nn.batch_normalization(conv1, mean1, var1, offset=None, scale=None, variance_epsilon=1e-6)
+        conv1 = tf.nn.relu(conv1)
+        conv1 = tf.nn.max_pool(conv1, [1, 3, 3, 1],[1, 2, 2, 1], padding="SAME") # batch size + num channels 
+
+        conv2 = tf.nn.conv2d(conv1, self.conv2_filter, strides=[1, 1, 1, 1], padding="SAME")
+        conv2 = tf.nn.bias_add(conv2, self.conv2_bias)
+        mean2, var2 = tf.nn.moments(conv2, axes=[0, 1, 2])
+        conv2 = tf.nn.batch_normalization(conv2, mean2, var2, offset=None, scale=None, variance_epsilon=1e-6)
+        conv2 = tf.nn.relu(conv2)
+        conv2 = tf.nn.max_pool(conv2, [1, 2, 2, 1],[1, 2, 2, 1], padding="SAME") # batch size + num channels 
+
+        conv3 = tf.nn.conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")
+        conv3 = tf.nn.bias_add(conv3, self.conv3_bias)
+        mean3, var3 = tf.nn.moments(conv3, axes=[0, 1, 2])
+        conv3 = tf.nn.batch_normalization(conv3, mean3, var3, offset=None, scale=None, variance_epsilon=1e-6)
+        conv3 = tf.nn.relu(conv3)
+
+        # conv3 = tf.reshape(conv3, [-1, 5 * 5 * 20]) # tk
+        conv3 = tf.reshape(conv3, [-1, 8 * 8 * 20])
+        
+        # l3_out = tf.reshape(l3_out, [l3_out.shape[0], -1]) ## <- Incorrect way
+
+        # self.dense1_weights = tf.Variable(tf.random.truncated_normal([5 * 5 * 20, 256], stddev=0.1))
+        # self.dense1_bias = tf.Variable(tf.zeros([256]))
+
+        # flat = tf.reshape(conv3, [-1, 5 * 5 * 20])
+
+        dense1 = tf.nn.relu(tf.matmul(conv3, self.dense1_weight) + self.dense1_bias) 
+        dense1 = tf.nn.dropout(dense1, 0.5)
+
+        dense2 = tf.nn.relu(tf.matmul(dense1, self.dense2_weight) + self.dense2_bias) 
+        dense2 = tf.nn.dropout(dense2, 0.5)  
+
+        dense3 = tf.nn.relu(tf.matmul(dense2, self.dense3_weight) + self.dense3_bias) 
+
+        return dense3 # logits
 
     def loss(self, logits, labels):
         """
@@ -59,8 +117,10 @@ class Model(tf.keras.Model):
         :param labels: during training, matrix of shape (batch_size, self.num_classes) containing the train labels
         :return: the loss of the model as a Tensor
         """
-
-        pass
+        print(tf.shape(labels))
+        print(tf.shape(logits))
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels, logits))
+        return loss
 
     def accuracy(self, logits, labels):
         """
@@ -93,25 +153,30 @@ def train(model, train_inputs, train_labels):
     :return: Return the average accuracy across batches of the train inputs/labels
     '''
 
+    num_batches = len(train_inputs) // (model.batch_size) # remaining data that doens't fit into one batch - disgarded
+    indices = tf.random.shuffle(range(len(train_inputs)))
     optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
+    # tf.image.random_flip_left_right
+    total_accuracy = 0
 
+    for i in range(num_batches):
+        batch_indices = indices[i * (model.batch_size) : (i + 1) * model.batch_size]
+        batch_inputs = tf.gather(train_inputs, batch_indices)
+        batch_labels = tf.gather(train_labels, batch_indices)
 
-    with tf.GradientTape() as tape:
-        logits = model(train_inputs) # y_pred
-        # Compute the loss value (the loss function is configured in `compile()`)
-        loss = model.loss(logits, train_labels)
+        with tf.GradientTape() as tape:
+            logits = model.call(batch_inputs) # y_pred # tk 
+            # Compute the loss value (the loss function is configured in `compile()`)
+            loss = model.loss(logits, batch_labels)
 
-    # gradient = tape.gradient(loss, )
-        
-    # accuracy = self.compiled_acc(y_pred, y)
+        gradients = tape.gradient(loss, model.trainable_variables)
+        optimizer.apply_gradients(zip(gradients, model.trainable_variables)) # what is this 
 
-        
-    # gradient = tape.gradient(loss, self.weights)
-    # self.optimizer.apply_gradients(self.weights, gradient)
+        batch_accuracy = model.accuracy(logits, batch_labels)
+        total_accuracy = total_accuracy + batch_accuracy
 
-
-        
-        
+    average_accuracy = total_accuracy / num_batches
+    return average_accuracy 
 
 def test(model, test_inputs, test_labels):
     """
@@ -125,8 +190,9 @@ def test(model, test_inputs, test_labels):
     :return: test accuracy - this should be the average accuracy across
     all batches
     """
-
-    pass
+    logits = model(test_inputs)
+    accuracy = model.accuracy(logits, test_labels)
+    return accuracy
 
 
 def visualize_loss(losses): 
@@ -215,16 +281,24 @@ def main():
     '''
     # TODO: Use the autograder filepaths to get data before submitting to autograder.
     #       Use the local filepaths when running on your local machine.
-
     AUTOGRADER_TRAIN_FILE = '../data/train'
     AUTOGRADER_TEST_FILE = '../data/test'
 
     LOCAL_TRAIN_FILE = "/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/train"
     LOCAL_TEST_FILE = '/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/test'
 
-    get_data(LOCAL_TRAIN_FILE, 3, 5)
-    return
+    train_inputs, train_labels = get_data(LOCAL_TRAIN_FILE, 3, 5) # tk
+    test_inputs, test_labels = get_data(LOCAL_TEST_FILE, 3, 5)
 
+    model = Model()
+
+    num_epochs = 10
+    for e in range(num_epochs):
+        train_accuracy = train(model, train_inputs, train_labels)
+        print(f"Epoch {e + 1}/{num_epochs}, Training Accuracy: {train_accuracy}")
+
+    test_accuracy = test(model, test_inputs, test_labels)
+    print(f"Test Accuracy: {test_accuracy}")
 
 if __name__ == '__main__':
     main()
