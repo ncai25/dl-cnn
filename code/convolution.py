@@ -56,8 +56,7 @@ def conv2d(inputs, filters, strides, padding):
 
 	# kern - filter; input - Img
 
-	output_width = int((in_width + 2*padX - filter_width) / strideX + 1)
-		
+	output_width = int((in_width + 2*padX - filter_width) / strideX + 1)	
 
 	#  input = [num_examples, in_height, in_width, in_channels]
 	#     input_data = np.random.random((4, 100, 3, 2)) -> (4, 100, 2, 16)

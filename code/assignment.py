@@ -33,22 +33,39 @@ class Model(tf.keras.Model):
         def create_variable(dims):  ## Easy initialization function for you :)
             return tf.Variable(tf.random.truncated_normal(dims, stddev=.1, dtype=tf.float32))
 
-        self.conv1_filter = create_variable([5,5,3,16])
-        # 5 x 5, 3 input channels, 16 output channels / 16 5x5 filters per channel
-        self.conv1_bias = create_variable([16]) # tf.zeros([16]) #tk
+        # self.conv1_filter = create_variable([5,5,3,16])
+        # # 5 x 5, 3 input channels, 16 output channels / 16 5x5 filters per channel
+        # self.conv1_bias = create_variable([16]) # tf.zeros([16]) #tk
 
-        self.conv2_filter = create_variable([5,5,16,20]) 
-        self.conv2_bias = create_variable([20])
+        # self.conv2_filter = create_variable([5,5,16,20]) 
+        # self.conv2_bias = create_variable([20])
 
-        self.conv3_filter = create_variable([3,3,20,20]) 
-        self.conv3_bias = create_variable([20])
+        # self.conv3_filter = create_variable([3,3,20,20]) 
+        # self.conv3_bias = create_variable([20])
 
-        self.dense1_weight = create_variable([8 * 8 * 20, 128]) #tk
-        self.dense1_bias = create_variable([128])
-        self.dense2_weight = create_variable([128, 16])
-        self.dense2_bias = create_variable([16])
-        self.dense3_weight = create_variable([16, 2])
-        self.dense3_bias = create_variable([2]) # eventually 2 classes 
+        # self.dense1_weight = create_variable([8 * 8 * 20, 128]) #tk
+        # self.dense1_bias = create_variable([128])
+        # self.dense2_weight = create_variable([128, 16])
+        # self.dense2_bias = create_variable([16])
+        # self.dense3_weight = create_variable([16, 2])
+        # self.dense3_bias = create_variable([2]) # eventually 2 classes 
+
+
+        self.conv1_filter = create_variable([1])
+        self.conv1_bias = tf.Variable(tf.ones([16]))  # Initialize bias to 1 for conv1
+        
+        self.conv2_filter = create_variable([1]) 
+        self.conv2_bias = tf.Variable(tf.ones([16]))  # Initialize bias to 1 for conv2
+        
+        self.conv3_filter = create_variable([1]) 
+        self.conv3_bias = tf.Variable(tf.ones([16]))  # Initialize bias to 1 for conv3
+        
+        self.dense1_weight = create_variable([8 * 8 * 20, 1])
+        self.dense1_bias = tf.Variable(tf.ones([1]))  # Initialize bias to 1 for dense1
+        self.dense2_weight = create_variable([128, 1])
+        self.dense2_bias = tf.Variable(tf.ones([16]))  # Initialize bias to 1 for dense2
+        self.dense3_weight = create_variable([16, 2])  # Adjusted bias for 2 classes
+        self.dense3_bias = tf.Variable(tf.ones([2])) 
 
     def call(self, inputs, is_testing=False):
         """
