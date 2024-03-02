@@ -281,8 +281,11 @@ def main():
     LOCAL_TRAIN_FILE = "/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/train"
     LOCAL_TEST_FILE = '/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/test'
 
-    train_inputs, train_labels = get_data(AUTOGRADER_TRAIN_FILE, 3, 5) 
-    test_inputs, test_labels = get_data(AUTOGRADER_TEST_FILE, 3, 5)
+    # train_inputs, train_labels = get_data(AUTOGRADER_TRAIN_FILE, 3, 5) 
+    # test_inputs, test_labels = get_data(AUTOGRADER_TEST_FILE, 3, 5)
+
+    train_inputs, train_labels = get_data(LOCAL_TRAIN_FILE, 3, 5) 
+    test_inputs, test_labels = get_data(LOCAL_TEST_FILE, 3, 5)
 
     model = Model()
 
