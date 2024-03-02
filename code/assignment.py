@@ -52,20 +52,20 @@ class Model(tf.keras.Model):
 
 
         self.conv1_filter = create_variable([1, 1, 1, 1])
-        self.conv1_bias = tf.Variable(tf.ones([1]))  # Initialize bias to 1 for conv1
+        self.conv1_bias = tf.Variable(tf.zeros([1]))  
         
         self.conv2_filter = create_variable([1, 1, 1, 1]) 
-        self.conv2_bias = tf.Variable(tf.ones([1]))  # Initialize bias to 1 for conv2
+        self.conv2_bias = tf.Variable(tf.zeros([1]))   
         
         self.conv3_filter = create_variable([1, 1, 1, 1]) 
-        self.conv3_bias = tf.Variable(tf.ones([1]))  # Initialize bias to 1 for conv3
+        self.conv3_bias = tf.Variable(tf.zeros([1]))   
         
         self.dense1_weight = create_variable([8 * 8, 1])
-        self.dense1_bias = tf.Variable(tf.ones([1]))  # Initialize bias to 1 for dense1
+        self.dense1_bias = tf.Variable(tf.zeros([1]))   
         self.dense2_weight = create_variable([1, 1])
-        self.dense2_bias = tf.Variable(tf.ones([1]))  # Initialize bias to 1 for dense2
-        self.dense3_weight = create_variable([1, 2])  # Adjusted bias for 2 classes
-        self.dense3_bias = tf.Variable(tf.ones([2])) 
+        self.dense2_bias = tf.Variable(tf.zeros([1]))   
+        self.dense3_weight = create_variable([1, 2])   
+        self.dense3_bias = tf.Variable(tf.zeros([2])) 
 
     def call(self, inputs, is_testing=False):
         """
