@@ -33,21 +33,21 @@ class Model(tf.keras.Model):
         def create_variable(dims):  ## Easy initialization function for you :)
             return tf.Variable(tf.random.truncated_normal(dims, stddev=.1, dtype=tf.float32))
 
-        self.conv1_filter = create_variable([5,5,3,16])
+        self.conv1_filter = create_variable([5,5,3,1])
         # 5 x 5, 3 input channels, 16 output channels / 16 5x5 filters per channel
-        self.conv1_bias = create_variable([16]) # tf.zeros([16]) #tk
+        self.conv1_bias = create_variable([1]) # tf.zeros([16]) #tk
 
         self.conv2_filter = create_variable([5,5,16,20]) 
         self.conv2_bias = create_variable([20])
 
         self.conv3_filter = create_variable([3,3,20,20]) 
-        self.conv3_bias = create_variable([20])
+        self.conv3_bias = create_variable([1])
 
         self.dense1_weight = create_variable([4 * 4 * 20, 128]) #tk
         self.dense1_bias = create_variable([128])
         self.dense2_weight = create_variable([128, 64])
         self.dense2_bias = create_variable([64])
-        self.dense3_weight = create_variable([64, 2])
+        self.dense3_weight = create_variable([32*32, 2])
         self.dense3_bias = create_variable([2]) # eventually 2 classes 
 
 
@@ -80,46 +80,46 @@ class Model(tf.keras.Model):
         # shape of filter = (filter_height, filter_width, in_channels, out_channels)
         # shape of strides = (batch_stride, height_stride, width_stride, channels_stride)
 
+        # conv1 = tf.nn.conv2d(inputs, self.conv1_filter, strides=[1, 2, 2, 1], padding="SAME")
+        # conv1 = tf.nn.bias_add(conv1, self.conv1_bias)
+        # mean1, var1 = tf.nn.moments(conv1, axes=[0, 1, 2])
+        # conv1 = tf.nn.batch_normalization(conv1, mean1, var1, offset=None, scale=None, variance_epsilon=1e-6)
+        # conv1 = tf.nn.relu(conv1)
+        # conv1 = tf.nn.max_pool(conv1, [1, 3, 3, 1],[1, 2, 2, 1], padding="SAME") # batch size + num channels 
 
-        conv1 = tf.nn.conv2d(inputs, self.conv1_filter, strides=[1, 2, 2, 1], padding="SAME")
-        conv1 = tf.nn.bias_add(conv1, self.conv1_bias)
-        mean1, var1 = tf.nn.moments(conv1, axes=[0, 1, 2])
-        conv1 = tf.nn.batch_normalization(conv1, mean1, var1, offset=None, scale=None, variance_epsilon=1e-6)
-        conv1 = tf.nn.relu(conv1)
-        conv1 = tf.nn.max_pool(conv1, [1, 3, 3, 1],[1, 2, 2, 1], padding="SAME") # batch size + num channels 
+        # conv2 = tf.nn.conv2d(conv1, self.conv2_filter, strides=[1, 1, 1, 1], padding="SAME")
+        # conv2 = tf.nn.bias_add(conv2, self.conv2_bias)
+        # mean2, var2 = tf.nn.moments(conv2, axes=[0, 1, 2])
+        # conv2 = tf.nn.batch_normalization(conv2, mean2, var2, offset=None, scale=None, variance_epsilon=1e-6)
+        # conv2 = tf.nn.relu(conv2)
+        # conv2 = tf.nn.max_pool(conv2, [1, 2, 2, 1],[1, 2, 2, 1], padding="SAME") # batch size + num channels 
 
-        conv2 = tf.nn.conv2d(conv1, self.conv2_filter, strides=[1, 1, 1, 1], padding="SAME")
-        conv2 = tf.nn.bias_add(conv2, self.conv2_bias)
-        mean2, var2 = tf.nn.moments(conv2, axes=[0, 1, 2])
-        conv2 = tf.nn.batch_normalization(conv2, mean2, var2, offset=None, scale=None, variance_epsilon=1e-6)
-        conv2 = tf.nn.relu(conv2)
-        conv2 = tf.nn.max_pool(conv2, [1, 2, 2, 1],[1, 2, 2, 1], padding="SAME") # batch size + num channels 
+        # if is_testing == False:
+        #     conv3 = tf.nn.conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")
+        # else: 
+        #     conv3 = conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")    
 
-        if is_testing == False:
-            conv3 = tf.nn.conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")
-        else: 
-            conv3 = conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")    
+        conv3 = tf.nn.conv2d(inputs, self.conv1_filter,strides=[1, 1, 1, 1],padding='SAME')
 
-        conv3 = tf.nn.bias_add(conv3, self.conv3_bias)
+        conv3 = tf.nn.bias_add(conv3, self.conv1_bias)
         mean3, var3 = tf.nn.moments(conv3, axes=[0, 1, 2])
         conv3 = tf.nn.batch_normalization(conv3, mean3, var3, offset=None, scale=None, variance_epsilon=1e-6)
         conv3 = tf.nn.relu(conv3)
         # print(conv3)
-
         # conv3 = tf.reshape(conv3, [-1, 8 * 8])
-        conv3 = tf.reshape(conv3, [-1, 4 * 4 * 20])
+        conv3 = tf.reshape(conv3, [-1, 32*32])
         # l3_out = tf.reshape(l3_out, [l3_out.shape[0], -1]) ## <- Incorrect way bc batch
 
-        dense1 = tf.nn.relu(tf.matmul(conv3, self.dense1_weight) + self.dense1_bias) 
-        dense1 = tf.nn.dropout(dense1, 0.3)
+        # dense1 = tf.nn.relu(tf.matmul(conv3, self.dense1_weight) + self.dense1_bias) 
+        # dense1 = tf.nn.dropout(dense1, 0.3)
 
-        dense2 = tf.nn.relu(tf.matmul(dense1, self.dense2_weight) + self.dense2_bias) 
-        dense2 = tf.nn.dropout(dense2, 0.3)  
+        # dense2 = tf.nn.relu(tf.matmul(dense1, self.dense2_weight) + self.dense2_bias) 
+        # dense2 = tf.nn.dropout(dense2, 0.3)  
 
         # dense3 = tf.nn.softmax(tf.matmul(dense2, self.dense3_weight) + self.dense3_bias) 
         # print(dense3)
         # negative -> 0 bc of relu 
-        dense3 = tf.nn.softmax((tf.matmul(dense2, self.dense3_weight) + self.dense3_bias))
+        dense3 = (tf.matmul(conv3, self.dense3_weight) + self.dense3_bias)
 
         return dense3 # logits
 
@@ -174,7 +174,6 @@ def train(model, train_inputs, train_labels):
     num_batches = len(train_inputs) // (model.batch_size) # remaining data that doens't fit into one batch - disgarded
     indices = tf.random.shuffle(range(len(train_inputs))) # range - not just len
     optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
-    # tf.image.random_flip_left_right
     total_accuracy = 0
 
     for i in range(num_batches):
@@ -185,11 +184,10 @@ def train(model, train_inputs, train_labels):
 
         with tf.GradientTape() as tape:
             logits = model.call(batch_inputs) # y_pred
-            # Compute the loss value (the loss function is configured in `compile()`)
             loss = model.loss(logits, batch_labels)
 
         gradients = tape.gradient(loss, model.trainable_variables)
-        optimizer.apply_gradients(zip(gradients, model.trainable_variables)) # what is this 
+        optimizer.apply_gradients(zip(gradients, model.trainable_variables))
 
         batch_accuracy = model.accuracy(logits, batch_labels)
         total_accuracy = total_accuracy + batch_accuracy
