@@ -15,29 +15,64 @@ def conv2d(inputs, filters, strides, padding):
 	:param padding: either "SAME" or "VALID", capitalization matters
 	:return: outputs, Tensor with shape [num_examples, output_height, output_width, output_channels]
 	"""
-	num_examples = None
-	in_height = None
-	in_width = None
-	input_in_channels = None
+	num_examples = inputs.shape[0] # tk: None? 
+	in_height = inputs.shape[1]
+	in_width = inputs.shape[2]
+	input_in_channels = inputs.shape[3]
 
-	filter_height = None
-	filter_width = None
-	filter_in_channels = None
-	filter_out_channels = None
+	filter_height = filters.shape[0]
+	filter_width = filters.shape[1]
+	filter_in_channels = filters.shape[2]
+	filter_out_channels = filters.shape[3]
 
-	num_examples_stride = None
-	strideY = None
-	strideX = None
-	channels_stride = None
+	num_examples_stride = strides[0]
+	strideY = strides[1]
+	strideX = strides[2]
+	channels_stride = strides[3]
 
+	strides = [num_examples_stride, strideY, strideX,channels_stride]
+	# inputs.shape = [num_examples, in_height, in_width, input_in_channels]
+	# filter.shape = [filter_height, filter_width, filter_in_channels, filter_out_channels]
+	
+	assert(input_in_channels == filter_in_channels), "Number of input channels must match number of filter channels"
+
+	if strides != [1, 1, 1, 1]:
+		raise ValueError("Strides must be [1, 1, 1, 1]")
+	
 	# Cleaning padding input
+	if padding == "SAME": # tk else? how to use padding
+		padY = math.floor((filter_height - 1)/2) #height
+		padX = math.floor((filter_width - 1)/2)
+		inputs = np.pad(inputs,  ((0,0), (padY, padY), (padX, padX), (0,0)), mode='constant', constant_values = (0,0))  #tk 
+		# x_pad = np.pad(x, ((0,0), (2, 2), (2, 2), (0,0)), mode='constant', constant_values = (0,0))
+
+	else: 
+		padY = 0
+		padX = 0
 
 	# Calculate output dimensions
+	output_height = int((in_height + 2*padY - filter_height) / strideY + 1)
+	# xOutput = int(((xImgShape - xKernShape + 2 * padding) / strides) + 1)
+	# kern - filter; input - Img
 
-	# PLEASE RETURN A TENSOR. HINT: tf.convert_to_tensor(your_array, dtype = tf.float32)
+	output_width = int((in_width + 2*padX - filter_width) / strideX + 1)
 
-	pass
+	output = np.zeros((num_examples, output_height, output_width, filter_out_channels))
 
+	for h in range(output_height): 
+		for w in range(output_width):
+			for i in range(input_in_channels):
+				for o in range(filter_out_channels):
+					output[:, h, w, o] \
+					+= np.sum(filters[:, :,i, o] * inputs[:, h: h + filter_height, w: w + filter_width, i])
+
+# output[x, y] = (kernel * imagePadded[x: x + xKernShape, y: y + yKernShape]).sum()
+
+	# PLEASE RETURN A TENSOR. HINT: 
+	
+	output = tf.convert_to_tensor(output, dtype = tf.float32)
+
+	return output
 def same_test_0():
 	'''
 	Simple test using SAME padding to check out differences between 

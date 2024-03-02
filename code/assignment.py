@@ -288,7 +288,7 @@ def main():
 
     model = Model()
 
-    num_epochs = 10
+    num_epochs = 5
     for e in range(num_epochs):
         train_accuracy = train(model, train_inputs, train_labels)
         print(f"Epoch {e + 1}/{num_epochs}, Training Accuracy: {train_accuracy}")
