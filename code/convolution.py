@@ -63,12 +63,13 @@ def conv2d(inputs, filters, strides, padding):
 	output = np.zeros((num_examples, output_height, output_width, filter_out_channels))
 	# print(tf.shape(output))
 
-	for h in range(output_height): 
-		for w in range(output_width):
-			for i in range(input_in_channels):
-				for o in range(filter_out_channels):
-					output[:, h, w, o] \
-					+= np.sum(filters[:, :,i, o] * inputs[:, h: h + filter_height, w: w + filter_width, i])
+	for b in range(num_examples):
+		for h in range(output_height): 
+			for w in range(output_width):
+				for i in range(input_in_channels):
+					for o in range(filter_out_channels):
+						output[b, h, w, o] \
+						+= np.sum(filters[:, :,i, o] * inputs[b, h: h + filter_height, w: w + filter_width, i])
 
 # output[x, y] = (kernel * imagePadded[x: x + xKernShape, y: y + yKernShape]).sum()
 
@@ -144,8 +145,9 @@ def valid_test_2():
 
 def main():
 	# TODO: Add in any tests you may want to use to view the differences between your and TensorFlow's output
-
-	return
+	same_test_0()
+	valid_test_0()
+	valid_test_2()
 
 if __name__ == '__main__':
 	main()

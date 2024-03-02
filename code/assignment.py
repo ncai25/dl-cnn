@@ -80,6 +80,7 @@ class Model(tf.keras.Model):
         # shape of filter = (filter_height, filter_width, in_channels, out_channels)
         # shape of strides = (batch_stride, height_stride, width_stride, channels_stride)
 
+
         conv1 = tf.nn.conv2d(inputs, self.conv1_filter, strides=[1, 1, 1, 1], padding="SAME")
         conv1 = tf.nn.bias_add(conv1, self.conv1_bias)
         mean1, var1 = tf.nn.moments(conv1, axes=[0, 1, 2])
@@ -94,22 +95,19 @@ class Model(tf.keras.Model):
         conv2 = tf.nn.relu(conv2)
         conv2 = tf.nn.max_pool(conv2, [1, 2, 2, 1],[1, 2, 2, 1], padding="SAME") # batch size + num channels 
 
-        conv3 = tf.nn.conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")
+        if is_testing == False:
+            conv3 = tf.nn.conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")
+        else: 
+            conv3 = conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")    
+
         conv3 = tf.nn.bias_add(conv3, self.conv3_bias)
         mean3, var3 = tf.nn.moments(conv3, axes=[0, 1, 2])
         conv3 = tf.nn.batch_normalization(conv3, mean3, var3, offset=None, scale=None, variance_epsilon=1e-6)
         conv3 = tf.nn.relu(conv3)
         # print(tf.shape(conv3))
-
-        # conv3 = tf.reshape(conv3, [-1, 5 * 5 * 20]) # tk
-        conv3 = tf.reshape(conv3, [-1, 8 * 8 ])
+        conv3 = tf.reshape(conv3, [-1, 8 * 8])
         # conv3 = tf.reshape(conv3, [-1, 8 * 8 * 20])
-
-        
         # l3_out = tf.reshape(l3_out, [l3_out.shape[0], -1]) ## <- Incorrect way bc batch
-
-        # self.dense1_weights = tf.Variable(tf.random.truncated_normal([5 * 5 * 20, 256], stddev=0.1))
-        # self.dense1_bias = tf.Variable(tf.zeros([256]))
 
         dense1 = tf.nn.relu(tf.matmul(conv3, self.dense1_weight) + self.dense1_bias) 
         dense1 = tf.nn.dropout(dense1, 0.5)
@@ -120,6 +118,8 @@ class Model(tf.keras.Model):
         dense3 = tf.nn.relu(tf.matmul(dense2, self.dense3_weight) + self.dense3_bias) 
 
         return dense3 # logits
+
+
         # print("being called")
 
     def loss(self, logits, labels):
@@ -310,7 +310,7 @@ def main():
     model = Model()
 
 
-    num_epochs = 1
+    num_epochs = 25
     for e in range(num_epochs):
         train_accuracy = train(model, train_inputs, train_labels)
         print(f"Epoch {e + 1}/{num_epochs}, Training Accuracy: {train_accuracy}")
