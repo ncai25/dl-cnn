@@ -102,7 +102,9 @@ class Model(tf.keras.Model):
         # print(tf.shape(conv3))
 
         # conv3 = tf.reshape(conv3, [-1, 5 * 5 * 20]) # tk
-        conv3 = tf.reshape(conv3, [-1, 8 * 8 * 20])
+        conv3 = tf.reshape(conv3, [-1, 8 * 8 ])
+        # conv3 = tf.reshape(conv3, [-1, 8 * 8 * 20])
+
         
         # l3_out = tf.reshape(l3_out, [l3_out.shape[0], -1]) ## <- Incorrect way bc batch
 
