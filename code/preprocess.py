@@ -37,7 +37,7 @@ def get_data(file_path, first_class, second_class):
 
     :param first_class:  an integer (0-9) representing the first target
     class in the CIFAR10 dataset, for a cat, this would be a 3
-    :param first_class:  an integer (0-9) representing the second target
+    :param second_class:  an integer (0-9) representing the second target
     class in the CIFAR10 dataset, for a dog, this would be a 5
     :return: normalized NumPy array of inputs and tensor of labels, where 
     inputs are of type np.float32 and has size (num_inputs, width, height, num_channels) and labels 

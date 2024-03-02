@@ -30,7 +30,6 @@ class Model(tf.keras.Model):
 
         # TODO: Initialize all trainable parameters
 
-
         def create_variable(dims):  ## Easy initialization function for you :)
             return tf.Variable(tf.random.truncated_normal(dims, stddev=.1, dtype=tf.float32))
 
@@ -49,7 +48,7 @@ class Model(tf.keras.Model):
         self.dense2_weight = create_variable([128, 16])
         self.dense2_bias = create_variable([16])
         self.dense3_weight = create_variable([16, 2])
-        self.dense3_bias = create_variable([2])
+        self.dense3_bias = create_variable([2]) # eventually 2 classes 
 
     def call(self, inputs, is_testing=False):
         """
@@ -83,16 +82,15 @@ class Model(tf.keras.Model):
         mean3, var3 = tf.nn.moments(conv3, axes=[0, 1, 2])
         conv3 = tf.nn.batch_normalization(conv3, mean3, var3, offset=None, scale=None, variance_epsilon=1e-6)
         conv3 = tf.nn.relu(conv3)
+        # print(tf.shape(conv3))
 
         # conv3 = tf.reshape(conv3, [-1, 5 * 5 * 20]) # tk
         conv3 = tf.reshape(conv3, [-1, 8 * 8 * 20])
         
-        # l3_out = tf.reshape(l3_out, [l3_out.shape[0], -1]) ## <- Incorrect way
+        # l3_out = tf.reshape(l3_out, [l3_out.shape[0], -1]) ## <- Incorrect way bc batch
 
         # self.dense1_weights = tf.Variable(tf.random.truncated_normal([5 * 5 * 20, 256], stddev=0.1))
         # self.dense1_bias = tf.Variable(tf.zeros([256]))
-
-        # flat = tf.reshape(conv3, [-1, 5 * 5 * 20])
 
         dense1 = tf.nn.relu(tf.matmul(conv3, self.dense1_weight) + self.dense1_bias) 
         dense1 = tf.nn.dropout(dense1, 0.5)
@@ -150,18 +148,18 @@ def train(model, train_inputs, train_labels):
     '''
 
     num_batches = len(train_inputs) // (model.batch_size) # remaining data that doens't fit into one batch - disgarded
-    indices = tf.random.shuffle(range(len(train_inputs)))
+    indices = tf.random.shuffle(range(len(train_inputs))) # range - not just len
     optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
     # tf.image.random_flip_left_right
     total_accuracy = 0
 
     for i in range(num_batches):
-        batch_indices = indices[i * (model.batch_size) : (i + 1) * model.batch_size]
+        batch_indices = indices[i * (model.batch_size) : (i + 1) * model.batch_size] # from one batch to another
         batch_inputs = tf.gather(train_inputs, batch_indices)
         batch_labels = tf.gather(train_labels, batch_indices)
 
         with tf.GradientTape() as tape:
-            logits = model.call(batch_inputs) # y_pred # tk 
+            logits = model.call(batch_inputs) # y_pred
             # Compute the loss value (the loss function is configured in `compile()`)
             loss = model.loss(logits, batch_labels)
 

@@ -45,7 +45,6 @@ def conv2d(inputs, filters, strides, padding):
 		padX = math.floor((filter_width - 1)/2)
 		inputs = np.pad(inputs,  ((0,0), (padY, padY), (padX, padX), (0,0)), mode='constant', constant_values = (0,0))  #tk 
 		# x_pad = np.pad(x, ((0,0), (2, 2), (2, 2), (0,0)), mode='constant', constant_values = (0,0))
-
 	else: 
 		padY = 0
 		padX = 0
@@ -56,8 +55,13 @@ def conv2d(inputs, filters, strides, padding):
 	# kern - filter; input - Img
 
 	output_width = int((in_width + 2*padX - filter_width) / strideX + 1)
+	print(output_width, in_width, filter_width, padX, strideX)
 
+
+	#  input = [num_examples, in_height, in_width, in_channels]
+	#     input_data = np.random.random((4, 100, 3, 2)) -> (4, 100, 2, 16)
 	output = np.zeros((num_examples, output_height, output_width, filter_out_channels))
+	# print(tf.shape(output))
 
 	for h in range(output_height): 
 		for w in range(output_width):
