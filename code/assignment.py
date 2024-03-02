@@ -57,15 +57,15 @@ class Model(tf.keras.Model):
         self.conv2_filter = create_variable([5, 5, 1, 1]) 
         self.conv2_bias = tf.Variable(tf.zeros([1]))   
         
-        self.conv3_filter = create_variable([5, 5, 1, 1]) 
+        self.conv3_filter = create_variable([3, 3, 1, 1]) 
         self.conv3_bias = tf.Variable(tf.zeros([1]))   
         
-        self.dense1_weight = create_variable([8 * 8, 1])
-        self.dense1_bias = tf.Variable(tf.zeros([1]))   
-        self.dense2_weight = create_variable([1, 1])
-        self.dense2_bias = tf.Variable(tf.zeros([1]))   
-        self.dense3_weight = create_variable([1, 2])   
-        self.dense3_bias = tf.Variable(tf.zeros([2])) 
+        self.dense1_weight = create_variable([8 * 8 , 128]) #tk
+        self.dense1_bias = create_variable([128])
+        self.dense2_weight = create_variable([128, 16])
+        self.dense2_bias = create_variable([16])
+        self.dense3_weight = create_variable([16, 2])
+        self.dense3_bias = create_variable([2]) # eventually 2 classes 
 
     def call(self, inputs, is_testing=False):
         """
@@ -104,18 +104,26 @@ class Model(tf.keras.Model):
         mean3, var3 = tf.nn.moments(conv3, axes=[0, 1, 2])
         conv3 = tf.nn.batch_normalization(conv3, mean3, var3, offset=None, scale=None, variance_epsilon=1e-6)
         conv3 = tf.nn.relu(conv3)
-        # print(tf.shape(conv3))
+        # print(conv3)
+
+
         conv3 = tf.reshape(conv3, [-1, 8 * 8])
         # conv3 = tf.reshape(conv3, [-1, 8 * 8 * 20])
         # l3_out = tf.reshape(l3_out, [l3_out.shape[0], -1]) ## <- Incorrect way bc batch
 
+        tf.nn.relu
+
         dense1 = tf.nn.relu(tf.matmul(conv3, self.dense1_weight) + self.dense1_bias) 
-        dense1 = tf.nn.dropout(dense1, 0.5)
+        dense1 = tf.nn.dropout(dense1, 0.1)
 
         dense2 = tf.nn.relu(tf.matmul(dense1, self.dense2_weight) + self.dense2_bias) 
-        dense2 = tf.nn.dropout(dense2, 0.5)  
+        dense2 = tf.nn.dropout(dense2, 0.1)  
 
-        dense3 = tf.nn.relu(tf.matmul(dense2, self.dense3_weight) + self.dense3_bias) 
+        # dense3 = tf.nn.softmax(tf.matmul(dense2, self.dense3_weight) + self.dense3_bias) 
+        # print(dense3)
+        # negative -> 0 bc of relu 
+        dense3 = (tf.matmul(dense2, self.dense3_weight) + self.dense3_bias) 
+
 
         return dense3 # logits
 
@@ -301,11 +309,11 @@ def main():
     LOCAL_TRAIN_FILE = "/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/train"
     LOCAL_TEST_FILE = '/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/test'
 
-    train_inputs, train_labels = get_data(AUTOGRADER_TRAIN_FILE, 3, 5) 
-    test_inputs, test_labels = get_data(AUTOGRADER_TEST_FILE, 3, 5)
+    # train_inputs, train_labels = get_data(AUTOGRADER_TRAIN_FILE, 3, 5) 
+    # test_inputs, test_labels = get_data(AUTOGRADER_TEST_FILE, 3, 5)
 
-    # train_inputs, train_labels = get_data(LOCAL_TRAIN_FILE, 3, 5) 
-    # test_inputs, test_labels = get_data(LOCAL_TEST_FILE, 3, 5)
+    train_inputs, train_labels = get_data(LOCAL_TRAIN_FILE, 3, 5) 
+    test_inputs, test_labels = get_data(LOCAL_TEST_FILE, 3, 5)
 
     model = Model()
 
