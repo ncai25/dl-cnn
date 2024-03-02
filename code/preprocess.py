@@ -48,10 +48,17 @@ def get_data(file_path, first_class, second_class):
     labels = unpickled_file[b'labels']
     # TODO: Do the rest of preprocessing! 
 
-    indices = [index for index, label in enumerate(labels) if (label == first_class or label == second_class)]
+    # indices = [index for index, label in enumerate(labels) if (label == first_class or label == second_class)]
 
-    inputs = np.array([inputs[index] for index in indices])
-    labels = np.array([labels[index] for index in indices])
+    # inputs = np.array([inputs[index] for index in indices])
+    # labels = np.array([labels[index] for index in indices])
+
+    inputs_numpy = np.array(inputs)
+    labels_numpy = np.array(labels)
+
+    req_boolean = np.logical_or(labels_numpy == first_class, labels_numpy == second_class)
+    inputs = inputs_numpy[req_boolean]
+    labels = labels_numpy[req_boolean]
 
     # inputs = np.reshape(inputs, (-1, 3, 32 ,32))
     inputs = np.reshape(inputs, (-1, 32, 32, 3))

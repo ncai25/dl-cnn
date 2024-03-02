@@ -146,7 +146,6 @@ def weird_shapes_1_same():
 
     print("Weird shapes 1 same test passed!")
 
-
 def weird_shapes_1_valid():
     input_data = np.random.random((4, 100, 3, 2))
 
@@ -171,7 +170,6 @@ def weird_shapes_1_valid():
 
     # Assert that the outputs are equal
     np.testing.assert_allclose(stu_output, true_output, rtol=1e-5, atol=1e-8)
-
     print("Weird shapes 1 valid test passed!")
 
 
