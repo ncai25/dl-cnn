@@ -1,3 +1,4 @@
+
 from __future__ import absolute_import
 from matplotlib import pyplot as plt
 from preprocess import get_data
@@ -12,6 +13,10 @@ import math
 # ensures that we run only on cpu
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
+def make_variables(*dims, initializer=tf.random.truncated_normal):
+            ## *dims takes all unnamed variables and condenses to dims list
+            return tf.Variable(initializer(dims, stddev=.1))
+
 class Model(tf.keras.Model):
     def __init__(self):
         """
@@ -21,51 +26,62 @@ class Model(tf.keras.Model):
         """
         super(Model, self).__init__()
 
-        self.batch_size = 32
+        #Hyperparameter initialization
+        self.epochs = 10
+        self.batch_size = 500
         self.num_classes = 2
         self.loss_list = [] # Append losses to this list in training so you can visualize loss vs time in main
 
-        # TODO: Initialize all hyperparameters
-        self.learning_rate = 1e-3
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001)
+
+        #convolution layer 1 filter hyperparameters
+        self.f1_height = 5
+        self.f1_width = 5
+        self.f1_strides = [1,1,1,1]
+        self.f1_inputchannels = 3
+        self.f1_outputchannels = 16
+        self.f1_padding = 'SAME'
+
+        #convolution layer 1 max pooling hyperparameters
+        self.p1_kernels = 3
+        self.p1_strides = [1, 2, 2, 1] 
+        self.p1_padding = 'SAME'
+
+        #convolution layer 2 filter hyperparameters
+
+        self.f2_height = 5
+        self.f2_width = 5
+        self.f2_strides = [1,2,2,1] #stride of 2
+        self.f2_inputchannels = self.f1_outputchannels
+        self.f2_outputchannels = 20
+        self.f2_padding = 'SAME'
+
+        #convolution layer 2 max pooling hyperparameters
+        self.p2_kernels = 2 
+        self.p2_strides = [1, 1, 1, 1]
+        self.p2_padding = 'SAME'
+
+        #dense layer 1 hyperparameters
+        #self.d1_input = 50
+
+        self.d1_dropout_rate = 0.5
+        self.d2_dropout_rate = 0.3
 
         # TODO: Initialize all trainable parameters
-
-        def create_variable(dims):  ## Easy initialization function for you :)
-            return tf.Variable(tf.random.truncated_normal(dims, stddev=.1, dtype=tf.float32))
-
-        self.conv1_filter = create_variable([5,5,3,1])
-        # 5 x 5, 3 input channels, 16 output channels / 16 5x5 filters per channel
-        self.conv1_bias = create_variable([1]) # tf.zeros([16]) #tk
-
-        self.conv2_filter = create_variable([5,5,16,20]) 
-        self.conv2_bias = create_variable([20])
-
-        self.conv3_filter = create_variable([3,3,20,20]) 
-        self.conv3_bias = create_variable([1])
-
-        self.dense1_weight = create_variable([4 * 4 * 20, 128]) #tk
-        self.dense1_bias = create_variable([128])
-        self.dense2_weight = create_variable([128, 64])
-        self.dense2_bias = create_variable([64])
-        self.dense3_weight = create_variable([32*32, 2])
-        self.dense3_bias = create_variable([2]) # eventually 2 classes 
-
-
-        # self.conv1_filter = create_variable([5, 5, 3, 1])
-        # self.conv1_bias = tf.Variable(tf.zeros([1]))  
+        self.filter1 = make_variables(self.f1_height, self.f1_width, self.f1_inputchannels, self.f1_outputchannels) #[f_height, f_width, in_channels, out_channels]
+        self.conv1_bias = make_variables(self.f1_outputchannels) 
         
-        # self.conv2_filter = create_variable([5, 5, 1, 1]) 
-        # self.conv2_bias = tf.Variable(tf.zeros([1]))   
+        self.filter2 = make_variables(self.f2_height, self.f2_width, self.f2_inputchannels, self.f2_outputchannels)
+        self.conv2_bias = make_variables(self.f2_outputchannels)
         
-        # self.conv3_filter = create_variable([3, 3, 1, 1]) 
-        # self.conv3_bias = tf.Variable(tf.zeros([1]))   
+        #self.filter3 = make_variables(5, 3, 3, 16)
+        #self.conv3_bias = None
         
-        # self.dense1_weight = create_variable([8 * 8 , 128]) #tk
-        # self.dense1_bias = create_variable([128])
-        # self.dense2_weight = create_variable([128, 16])
-        # self.dense2_bias = create_variable([16])
-        # self.dense3_weight = create_variable([16, 2])
-        # self.dense3_bias = create_variable([2]) # eventually 2 classes 
+        self.w1 = make_variables(1280, 50) 
+        self.b1 = make_variables(50)
+
+        self.w2 = make_variables(50, 2)
+        self.b2 = make_variables(2)
 
     def call(self, inputs, is_testing=False):
         """
@@ -80,51 +96,26 @@ class Model(tf.keras.Model):
         # shape of filter = (filter_height, filter_width, in_channels, out_channels)
         # shape of strides = (batch_stride, height_stride, width_stride, channels_stride)
 
-        # conv1 = tf.nn.conv2d(inputs, self.conv1_filter, strides=[1, 2, 2, 1], padding="SAME")
-        # conv1 = tf.nn.bias_add(conv1, self.conv1_bias)
-        # mean1, var1 = tf.nn.moments(conv1, axes=[0, 1, 2])
-        # conv1 = tf.nn.batch_normalization(conv1, mean1, var1, offset=None, scale=None, variance_epsilon=1e-6)
-        # conv1 = tf.nn.relu(conv1)
-        # conv1 = tf.nn.max_pool(conv1, [1, 3, 3, 1],[1, 2, 2, 1], padding="SAME") # batch size + num channels 
+        conv1_out = tf.nn.conv2d(inputs, self.filter1, strides = self.f1_strides, padding = self.f1_padding)
+        conv1_out = tf.nn.bias_add(conv1_out, self.conv1_bias) 
+        #conv1_out = tf.nn.batch_normalization(conv1_out, np.mean(conv1_out), np.std(conv1_out), None, None, 1e-3) ###do tf.nn.moments
+        conv1_out = tf.nn.relu(conv1_out)
+        conv1_out = tf.nn.max_pool(conv1_out, self.p1_kernels, self.p1_strides, padding = self.p1_padding)
 
-        # conv2 = tf.nn.conv2d(conv1, self.conv2_filter, strides=[1, 1, 1, 1], padding="SAME")
-        # conv2 = tf.nn.bias_add(conv2, self.conv2_bias)
-        # mean2, var2 = tf.nn.moments(conv2, axes=[0, 1, 2])
-        # conv2 = tf.nn.batch_normalization(conv2, mean2, var2, offset=None, scale=None, variance_epsilon=1e-6)
-        # conv2 = tf.nn.relu(conv2)
-        # conv2 = tf.nn.max_pool(conv2, [1, 2, 2, 1],[1, 2, 2, 1], padding="SAME") # batch size + num channels 
+        conv2_out = tf.nn.conv2d(conv1_out, self.filter2, strides = self.f2_strides, padding = self.f2_padding)
+        conv2_out = tf.nn.bias_add(conv2_out, self.conv2_bias) 
+        #conv2_out = tf.nn.batch_normalization(conv2_out, np.mean(conv2_out), np.std(conv2_out), None, None, 1e-3) ###what to do for mean and variance?
+        conv2_out = tf.nn.relu(conv2_out)
+        conv2_out = tf.nn.max_pool(conv2_out, self.p2_kernels, self.p2_strides, padding = self.p2_padding)
 
-        # if is_testing == False:
-        #     conv3 = tf.nn.conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")
-        # else: 
-        #     conv3 = conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")    
+        conv2_out = tf.reshape(conv2_out, (-1, np.prod(conv2_out.shape[1:]))) 
+        dense1_out = tf.matmul(tf.nn.relu(conv2_out), self.w1) + self.b1 
+        dense1_out = tf.nn.dropout(dense1_out, rate = self.d1_dropout_rate)
+        dense2_out = tf.matmul(dense1_out, self.w2) + self.b2
+        dense2_out = tf.nn.dropout(dense2_out, rate = self.d2_dropout_rate)
 
-        conv3 = tf.nn.conv2d(inputs, self.conv1_filter,strides=[1, 1, 1, 1],padding='SAME')
-
-        conv3 = tf.nn.bias_add(conv3, self.conv1_bias)
-        mean3, var3 = tf.nn.moments(conv3, axes=[0, 1, 2])
-        conv3 = tf.nn.batch_normalization(conv3, mean3, var3, offset=None, scale=None, variance_epsilon=1e-6)
-        conv3 = tf.nn.relu(conv3)
-        # print(conv3)
-        # conv3 = tf.reshape(conv3, [-1, 8 * 8])
-        conv3 = tf.reshape(conv3, [-1, 32*32])
-        # l3_out = tf.reshape(l3_out, [l3_out.shape[0], -1]) ## <- Incorrect way bc batch
-
-        # dense1 = tf.nn.relu(tf.matmul(conv3, self.dense1_weight) + self.dense1_bias) 
-        # dense1 = tf.nn.dropout(dense1, 0.3)
-
-        # dense2 = tf.nn.relu(tf.matmul(dense1, self.dense2_weight) + self.dense2_bias) 
-        # dense2 = tf.nn.dropout(dense2, 0.3)  
-
-        # dense3 = tf.nn.softmax(tf.matmul(dense2, self.dense3_weight) + self.dense3_bias) 
-        # print(dense3)
-        # negative -> 0 bc of relu 
-        dense3 = (tf.matmul(conv3, self.dense3_weight) + self.dense3_bias)
-
-        return dense3 # logits
-
-
-        # print("being called")
+        return dense2_out #should be shape (batch_size, 2)
+    
 
     def loss(self, logits, labels):
         """
