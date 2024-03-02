@@ -57,7 +57,7 @@ class Model(tf.keras.Model):
         self.conv2_filter = create_variable([5, 5, 1, 1]) 
         self.conv2_bias = tf.Variable(tf.zeros([1]))   
         
-        self.conv3_filter = create_variable([3, 3, 1, 1]) 
+        self.conv3_filter = create_variable([5, 5, 1, 1]) 
         self.conv3_bias = tf.Variable(tf.zeros([1]))   
         
         self.dense1_weight = create_variable([8 * 8, 1])
@@ -301,11 +301,11 @@ def main():
     LOCAL_TRAIN_FILE = "/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/train"
     LOCAL_TEST_FILE = '/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/test'
 
-    # train_inputs, train_labels = get_data(AUTOGRADER_TRAIN_FILE, 3, 5) 
-    # test_inputs, test_labels = get_data(AUTOGRADER_TEST_FILE, 3, 5)
+    train_inputs, train_labels = get_data(AUTOGRADER_TRAIN_FILE, 3, 5) 
+    test_inputs, test_labels = get_data(AUTOGRADER_TEST_FILE, 3, 5)
 
-    train_inputs, train_labels = get_data(LOCAL_TRAIN_FILE, 3, 5) 
-    test_inputs, test_labels = get_data(LOCAL_TEST_FILE, 3, 5)
+    # train_inputs, train_labels = get_data(LOCAL_TRAIN_FILE, 3, 5) 
+    # test_inputs, test_labels = get_data(LOCAL_TEST_FILE, 3, 5)
 
     model = Model()
 
