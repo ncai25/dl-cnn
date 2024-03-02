@@ -26,46 +26,46 @@ class Model(tf.keras.Model):
         self.loss_list = [] # Append losses to this list in training so you can visualize loss vs time in main
 
         # TODO: Initialize all hyperparameters
-        self.learning_rate = 1e-3
+        self.learning_rate = 1e-4
 
         # TODO: Initialize all trainable parameters
 
         def create_variable(dims):  ## Easy initialization function for you :)
             return tf.Variable(tf.random.truncated_normal(dims, stddev=.1, dtype=tf.float32))
 
-        # self.conv1_filter = create_variable([5,5,3,16])
-        # # 5 x 5, 3 input channels, 16 output channels / 16 5x5 filters per channel
-        # self.conv1_bias = create_variable([16]) # tf.zeros([16]) #tk
+        self.conv1_filter = create_variable([5,5,3,16])
+        # 5 x 5, 3 input channels, 16 output channels / 16 5x5 filters per channel
+        self.conv1_bias = create_variable([16]) # tf.zeros([16]) #tk
 
-        # self.conv2_filter = create_variable([5,5,16,20]) 
-        # self.conv2_bias = create_variable([20])
+        self.conv2_filter = create_variable([5,5,16,20]) 
+        self.conv2_bias = create_variable([20])
 
-        # self.conv3_filter = create_variable([3,3,20,20]) 
-        # self.conv3_bias = create_variable([20])
+        self.conv3_filter = create_variable([3,3,20,20]) 
+        self.conv3_bias = create_variable([20])
 
-        # self.dense1_weight = create_variable([8 * 8 * 20, 128]) #tk
-        # self.dense1_bias = create_variable([128])
-        # self.dense2_weight = create_variable([128, 16])
-        # self.dense2_bias = create_variable([16])
-        # self.dense3_weight = create_variable([16, 2])
-        # self.dense3_bias = create_variable([2]) # eventually 2 classes 
-
-
-        self.conv1_filter = create_variable([5, 5, 3, 1])
-        self.conv1_bias = tf.Variable(tf.zeros([1]))  
-        
-        self.conv2_filter = create_variable([5, 5, 1, 1]) 
-        self.conv2_bias = tf.Variable(tf.zeros([1]))   
-        
-        self.conv3_filter = create_variable([3, 3, 1, 1]) 
-        self.conv3_bias = tf.Variable(tf.zeros([1]))   
-        
-        self.dense1_weight = create_variable([8 * 8 , 128]) #tk
+        self.dense1_weight = create_variable([8 * 8 * 20, 128]) #tk
         self.dense1_bias = create_variable([128])
         self.dense2_weight = create_variable([128, 16])
         self.dense2_bias = create_variable([16])
         self.dense3_weight = create_variable([16, 2])
         self.dense3_bias = create_variable([2]) # eventually 2 classes 
+
+
+        # self.conv1_filter = create_variable([5, 5, 3, 1])
+        # self.conv1_bias = tf.Variable(tf.zeros([1]))  
+        
+        # self.conv2_filter = create_variable([5, 5, 1, 1]) 
+        # self.conv2_bias = tf.Variable(tf.zeros([1]))   
+        
+        # self.conv3_filter = create_variable([3, 3, 1, 1]) 
+        # self.conv3_bias = tf.Variable(tf.zeros([1]))   
+        
+        # self.dense1_weight = create_variable([8 * 8 , 128]) #tk
+        # self.dense1_bias = create_variable([128])
+        # self.dense2_weight = create_variable([128, 16])
+        # self.dense2_bias = create_variable([16])
+        # self.dense3_weight = create_variable([16, 2])
+        # self.dense3_bias = create_variable([2]) # eventually 2 classes 
 
     def call(self, inputs, is_testing=False):
         """
@@ -98,7 +98,7 @@ class Model(tf.keras.Model):
         if is_testing == False:
             conv3 = tf.nn.conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")
         else: 
-            conv3 = tf.nn.conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")    
+            conv3 = conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")    
 
         conv3 = tf.nn.bias_add(conv3, self.conv3_bias)
         mean3, var3 = tf.nn.moments(conv3, axes=[0, 1, 2])
@@ -107,23 +107,20 @@ class Model(tf.keras.Model):
         # print(conv3)
 
 
-        conv3 = tf.reshape(conv3, [-1, 8 * 8])
-        # conv3 = tf.reshape(conv3, [-1, 8 * 8 * 20])
+        # conv3 = tf.reshape(conv3, [-1, 8 * 8])
+        conv3 = tf.reshape(conv3, [-1, 8 * 8 * 20])
         # l3_out = tf.reshape(l3_out, [l3_out.shape[0], -1]) ## <- Incorrect way bc batch
 
-        tf.nn.relu
-
         dense1 = tf.nn.relu(tf.matmul(conv3, self.dense1_weight) + self.dense1_bias) 
-        dense1 = tf.nn.dropout(dense1, 0.1)
+        dense1 = tf.nn.dropout(dense1, 0.4)
 
         dense2 = tf.nn.relu(tf.matmul(dense1, self.dense2_weight) + self.dense2_bias) 
-        dense2 = tf.nn.dropout(dense2, 0.1)  
+        dense2 = tf.nn.dropout(dense2, 0.4)  
 
         # dense3 = tf.nn.softmax(tf.matmul(dense2, self.dense3_weight) + self.dense3_bias) 
         # print(dense3)
         # negative -> 0 bc of relu 
         dense3 = (tf.matmul(dense2, self.dense3_weight) + self.dense3_bias) 
-
 
         return dense3 # logits
 
@@ -177,13 +174,14 @@ def train(model, train_inputs, train_labels):
 
     num_batches = len(train_inputs) // (model.batch_size) # remaining data that doens't fit into one batch - disgarded
     indices = tf.random.shuffle(range(len(train_inputs))) # range - not just len
-    optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
+    optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
     # tf.image.random_flip_left_right
     total_accuracy = 0
 
     for i in range(num_batches):
         batch_indices = indices[i * (model.batch_size) : (i + 1) * model.batch_size] # from one batch to another
         batch_inputs = tf.gather(train_inputs, batch_indices)
+        batch_inputs = tf.image.random_flip_left_right(batch_inputs)
         batch_labels = tf.gather(train_labels, batch_indices)
 
         with tf.GradientTape() as tape:
@@ -318,7 +316,7 @@ def main():
     model = Model()
 
 
-    num_epochs = 25
+    num_epochs = 15
     for e in range(num_epochs):
         train_accuracy = train(model, train_inputs, train_labels)
         print(f"Epoch {e + 1}/{num_epochs}, Training Accuracy: {train_accuracy}")
