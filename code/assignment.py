@@ -98,7 +98,7 @@ class Model(tf.keras.Model):
         if is_testing == False:
             conv3 = tf.nn.conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")
         else: 
-            conv3 = conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")    
+            conv3 = tf.nn.conv2d(conv2, self.conv3_filter, strides=[1, 1, 1, 1], padding="SAME")    
 
         conv3 = tf.nn.bias_add(conv3, self.conv3_bias)
         mean3, var3 = tf.nn.moments(conv3, axes=[0, 1, 2])
