@@ -51,13 +51,13 @@ class Model(tf.keras.Model):
         # self.dense3_bias = create_variable([2]) # eventually 2 classes 
 
 
-        self.conv1_filter = create_variable([1, 1, 1, 1])
+        self.conv1_filter = create_variable([5, 5, 3, 1])
         self.conv1_bias = tf.Variable(tf.zeros([1]))  
         
-        self.conv2_filter = create_variable([1, 1, 1, 1]) 
+        self.conv2_filter = create_variable([5, 5, 1, 1]) 
         self.conv2_bias = tf.Variable(tf.zeros([1]))   
         
-        self.conv3_filter = create_variable([1, 1, 1, 1]) 
+        self.conv3_filter = create_variable([3, 3, 1, 1]) 
         self.conv3_bias = tf.Variable(tf.zeros([1]))   
         
         self.dense1_weight = create_variable([8 * 8, 1])
