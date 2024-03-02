@@ -30,7 +30,7 @@ def conv2d(inputs, filters, strides, padding):
 	strideX = strides[2]
 	channels_stride = strides[3]
 
-	strides = [num_examples_stride, strideY, strideX,channels_stride]
+	strides = [num_examples_stride, strideY, strideX, channels_stride]
 	# inputs.shape = [num_examples, in_height, in_width, input_in_channels]
 	# filter.shape = [filter_height, filter_width, filter_in_channels, filter_out_channels]
 	
@@ -41,13 +41,14 @@ def conv2d(inputs, filters, strides, padding):
 	
 	# Cleaning padding input
 	if padding == "SAME": # tk else? how to use padding
-		padY = math.floor((filter_height - 1)/2) #height
-		padX = math.floor((filter_width - 1)/2)
-		inputs = np.pad(inputs,  ((0,0), (padY, padY), (padX, padX), (0,0)), mode='constant', constant_values = (0,0))  #tk 
+		padY = (filter_height - 1)/2 #height
+		padX = (filter_width - 1)/2
 		# x_pad = np.pad(x, ((0,0), (2, 2), (2, 2), (0,0)), mode='constant', constant_values = (0,0))
 	else: 
 		padY = 0
 		padX = 0
+	
+	inputs = np.pad(inputs,  ((0,0), (math.floor(padY), math.floor(padY)), (math.floor(padX), math.floor(padX)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
 
 	# Calculate output dimensions
 	output_height = int((in_height + 2*padY - filter_height) / strideY + 1)
@@ -56,9 +57,7 @@ def conv2d(inputs, filters, strides, padding):
 	# kern - filter; input - Img
 
 	output_width = int((in_width + 2*padX - filter_width) / strideX + 1)
-	
-	print(output_width, in_width, filter_width, padX, strideX)
-	
+		
 
 	#  input = [num_examples, in_height, in_width, in_channels]
 	#     input_data = np.random.random((4, 100, 3, 2)) -> (4, 100, 2, 16)
