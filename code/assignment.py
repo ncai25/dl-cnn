@@ -283,12 +283,12 @@ def main():
     LOCAL_TRAIN_FILE = "/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/train"
     LOCAL_TEST_FILE = '/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/test'
 
-    train_inputs, train_labels = get_data(LOCAL_TRAIN_FILE, 3, 5) 
-    test_inputs, test_labels = get_data(LOCAL_TEST_FILE, 3, 5)
+    train_inputs, train_labels = get_data(AUTOGRADER_TRAIN_FILE, 3, 5) 
+    test_inputs, test_labels = get_data(AUTOGRADER_TEST_FILE, 3, 5)
 
     model = Model()
 
-    num_epochs = 5
+    num_epochs = 10
     for e in range(num_epochs):
         train_accuracy = train(model, train_inputs, train_labels)
         print(f"Epoch {e + 1}/{num_epochs}, Training Accuracy: {train_accuracy}")
