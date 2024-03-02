@@ -1,4 +1,3 @@
-
 from __future__ import absolute_import
 from matplotlib import pyplot as plt
 from preprocess import get_data
@@ -116,7 +115,6 @@ class Model(tf.keras.Model):
 
         return dense2_out #should be shape (batch_size, 2)
     
-
     def loss(self, logits, labels):
         """
         Calculates the model cross-entropy loss after one forward pass.
@@ -127,9 +125,9 @@ class Model(tf.keras.Model):
         :param labels: during training, matrix of shape (batch_size, self.num_classes) containing the train labels
         :return: the loss of the model as a Tensor
         """
-     
-        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels, logits))
-        return loss
+
+        losses = tf.nn.softmax_cross_entropy_with_logits(labels, logits)
+        return tf.reduce_mean(losses)
 
     def accuracy(self, logits, labels):
         """
@@ -147,7 +145,6 @@ class Model(tf.keras.Model):
         correct_predictions = tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1))
         return tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
 
-
 def train(model, train_inputs, train_labels):
     '''
     Trains the model on all of the inputs and labels for one epoch. You should shuffle your inputs 
@@ -161,6 +158,7 @@ def train(model, train_inputs, train_labels):
     :param train_labels: train labels (all labels to use for training), 
     shape (num_labels, num_classes)y across batches of the train inputs/labels
     '''
+    print(f"Training model")
     ## Compile out model with all of the required components
     # model.compile(optimizer = model.optimizer, loss = model.loss(), metrics = model.accuracy()) ### am i supposed to do this or is this what I do manually
 
@@ -173,6 +171,8 @@ def train(model, train_inputs, train_labels):
     shuffled_labels = tf.gather(train_labels, indices)
     
     for b, b1 in enumerate(range(batch_size, shuffled_inputs.shape[0] + 1, batch_size), 1):
+        print(f"Batch {b}")
+
         b0 = b1 - batch_size
         batch_inputs = shuffled_inputs[b0: b1]
         batch_inputs = tf.image.random_flip_left_right(batch_inputs)
@@ -182,11 +182,13 @@ def train(model, train_inputs, train_labels):
             pred_labels = model.call(batch_inputs)
             loss = model.loss(pred_labels, batch_labels)
             model.loss_list.append(loss)
+            print(f"loss: {loss}")
         
         gradients = tape.gradient(loss, model.trainable_variables) 
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
         
         batch_acc = model.accuracy(pred_labels, batch_labels)
+        print(f"Batch Accuracy: {batch_acc}")
 
         accuracies.append(batch_acc)
     
@@ -218,7 +220,6 @@ def test(model, test_inputs, test_labels):
         accuracies.append(model.accuracy(pred_labels, batch_labels))
     
     return np.mean(accuracies)
-
 
 
 def visualize_loss(losses): 
@@ -310,26 +311,27 @@ def main():
     AUTOGRADER_TRAIN_FILE = '../data/train'
     AUTOGRADER_TEST_FILE = '../data/test'
 
-    LOCAL_TRAIN_FILE = "/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/train"
-    LOCAL_TEST_FILE = '/Users/noracai/Documents/CS1470/homework-3p-cnns-norafk-1/data/test'
+    LOCAL_TRAIN_FILE = 'data/train'
+    LOCAL_TEST_FILE = 'data/test'
 
-    # train_inputs, train_labels = get_data(AUTOGRADER_TRAIN_FILE, 3, 5) 
-    # test_inputs, test_labels = get_data(AUTOGRADER_TEST_FILE, 3, 5)
-
-    train_inputs, train_labels = get_data(LOCAL_TRAIN_FILE, 3, 5) 
+    train_inputs, train_labels = get_data(LOCAL_TRAIN_FILE, 3, 5)
     test_inputs, test_labels = get_data(LOCAL_TEST_FILE, 3, 5)
+
+    #train_inputs, train_labels = get_data(AUTOGRADER_TRAIN_FILE, 3, 5)
+    #test_inputs, test_labels = get_data(AUTOGRADER_TEST_FILE, 3, 5)
 
     model = Model()
 
+    for e in range(1, model.epochs):
+        print(f"Epoch {e}")
+        acc = train(model, train_inputs, train_labels)
+        print(f"Training Accuracy: {acc}")
 
-    num_epochs = 15
-    for e in range(num_epochs):
-        train_accuracy = train(model, train_inputs, train_labels)
-        print(f"Epoch {e + 1}/{num_epochs}, Training Accuracy: {train_accuracy}")
+    test_acc = test(model, test_inputs, test_labels)
+    print(f"Testing Accuracy: {test_acc}")
 
-    test_accuracy = test(model, test_inputs, test_labels)
-    print(f"Test Accuracy: {test_accuracy}")
+    return
+
 
 if __name__ == '__main__':
     main()
-
