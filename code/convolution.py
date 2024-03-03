@@ -54,12 +54,15 @@ def conv2d(inputs, filters, strides, padding):
 		# 	pad_height_top = padY
 
 		# x_pad = np.pad(x, ((0,0), (2, 2), (2, 2), (0,0)), mode='constant', constant_values = (0,0))
-		inputs = np.pad(inputs,  ((0,0), (math.floor(pad_height_top), math.ceil(pad_height_bottom)), (math.floor(pad_width_left), math.ceil(pad_width_right)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
-		print(f"padY/pad height: {padY}, padX/padWidth: {padX}")
+		inputs = np.pad(inputs,  ((0,0), (math.floor(padY), math.ceil(padY)), (math.floor(padX), math.ceil(padX)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
+
+		# inputs = np.pad(inputs,  ((0,0), (math.floor(pad_height_top), math.ceil(pad_height_bottom)), (math.floor(pad_width_left), math.ceil(pad_width_right)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
 	else: 
 		padY = 0
 		padX = 0
 	
+	print(f"padY/pad height: {padY}, padX/padWidth: {padX}")
+
 
 	# Calculate output dimensions
 	output_height = int((in_height + 2*padY - filter_height) / strideY + 1)
