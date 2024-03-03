@@ -45,7 +45,6 @@ def conv2d(inputs, filters, strides, padding):
 		padX = (filter_width - 1)/2
 		# x_pad = np.pad(x, ((0,0), (2, 2), (2, 2), (0,0)), mode='constant', constant_values = (0,0))
 		inputs = np.pad(inputs,  ((0,0), (math.floor(padY), math.floor(padY)), (math.floor(padX), math.floor(padX)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
-
 	else: 
 		padY = 0
 		padX = 0
@@ -62,9 +61,9 @@ def conv2d(inputs, filters, strides, padding):
 	#  input_data = np.random.random((4, 100, 3, 2)) -> (4, 100, 2, 16)
 	output = np.zeros((num_examples, output_height, output_width, filter_out_channels))
 	
-	print(f"my conv2d: {tf.shape(output)}")
-	print(f"tf.nn.conved: {tf.nn.conv2d(inputs, filters, strides, padding)}")
-	print(f"tf.nn.conved: {tf.shape(tf.nn.conv2d(inputs, filters, strides, padding))}")
+	print(f"my conv2d shape: {tf.shape(output)}")
+	print(f"tf.nn.conv2d: {tf.nn.conv2d(inputs, filters, strides, padding)}")
+	print(f"tf.nn.conv2d shape: {tf.shape(tf.nn.conv2d(inputs, filters, strides, padding))}")
 
 
 	for b in range(num_examples):
@@ -76,7 +75,7 @@ def conv2d(inputs, filters, strides, padding):
 						+= np.sum(filters[:, :,i, o] * inputs[b, h: h + filter_height, w: w + filter_width, i])
 
 	# output[x, y] = (kernel * imagePadded[x: x + xKernShape, y: y + yKernShape]).sum()
-	print(f"print my conv2d again: {tf.shape(output)}")
+	print(f"my conv2d shape again: {tf.shape(output)}")
 	print(f"my conv2d: {output}")
 
 	# PLEASE RETURN A TENSOR. HINT: 
