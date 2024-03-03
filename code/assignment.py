@@ -27,7 +27,7 @@ class Model(tf.keras.Model):
 
         #Hyperparameter initialization
         self.epochs = 10
-        self.batch_size = 500 # tk 
+        self.batch_size = 64 # tk 500
         self.num_classes = 2
         self.loss_list = [] # Append losses to this list in training so you can visualize loss vs time in main
 
@@ -141,62 +141,19 @@ class Model(tf.keras.Model):
         correct_predictions = tf.equal(tf.argmax(logits, 1), tf.argmax(labels, 1))
         return tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
 
-# def train(model, train_inputs, train_labels):
-#     '''
-#     Trains the model on all of the inputs and labels for one epoch. You should shuffle your inputs 
-#     and labels - ensure that they are shuffled in the same order using tf.gather or zipping.
-#     To increase accuracy, you may want to use tf.image.random_flip_left_right on your
-#     inputs before doing the forward pass. You should batch your inputs.
-    
-#     :param model: the initialized model to use for the forward pass and backward pass
-#     :param train_inputs: train inputs (all inputs to use for training), 
-#     shape (num_inputs, width, height, num_channels)
-#     :param train_labels: train labels (all labels to use for training), 
-#     shape (num_labels, num_classes)y across batches of the train inputs/labels
-#     '''
-#     ## Compile out model with all of the required components
-#     # model.compile(optimizer = model.optimizer, loss = model.loss(), metrics = model.accuracy()) ### am i supposed to do this or is this what I do manually
-
-#     batch_size = model.batch_size
-#     accuracies = []
-
-#     #shuffle inputs
-#     indices = tf.random.shuffle(range(0, train_inputs.shape[0]))
-#     shuffled_inputs = tf.gather(train_inputs, indices) 
-#     shuffled_labels = tf.gather(train_labels, indices)
-    
-#     for b, b1 in enumerate(range(batch_size, shuffled_inputs.shape[0] + 1, batch_size), 1):
-#         b0 = b1 - batch_size
-#         batch_inputs = shuffled_inputs[b0: b1]
-#         batch_inputs = tf.image.random_flip_left_right(batch_inputs)
-#         batch_labels = shuffled_labels[b0:b1]
-
-#         with tf.GradientTape() as tape:
-#             pred_labels = model.call(batch_inputs)
-#             loss = model.loss(pred_labels, batch_labels)
-#             model.loss_list.append(loss)
-#             print(f"loss: {loss}")
-        
-#         gradients = tape.gradient(loss, model.trainable_variables) 
-#         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-        
-#         batch_acc = model.accuracy(pred_labels, batch_labels)
-#         accuracies.append(batch_acc)
-    
-#     return np.mean(accuracies)
-
 def train(model, train_inputs, train_labels):
-#     Trains the model on all of the inputs and labels for one epoch. You should shuffle your inputs 
-#     and labels - ensure that they are shuffled in the same order using tf.gather or zipping.
-#     To increase accuracy, you may want to use tf.image.random_flip_left_right on your
-#     inputs before doing the forward pass. You should batch your inputs.
+    '''
+    Trains the model on all of the inputs and labels for one epoch. You should shuffle your inputs 
+    and labels - ensure that they are shuffled in the same order using tf.gather or zipping.
+    To increase accuracy, you may want to use tf.image.random_flip_left_right on your
+    inputs before doing the forward pass. You should batch your inputs.
     
-#     :param model: the initialized model to use for the forward pass and backward pass
-#     :param train_inputs: train inputs (all inputs to use for training), 
-#     shape (num_inputs, width, height, num_channels)
-#     :param train_labels: train labels (all labels to use for training), 
-#     shape (num_labels, num_classes)y across batches of the train inputs/labels
-#     '''
+    :param model: the initialized model to use for the forward pass and backward pass
+    :param train_inputs: train inputs (all inputs to use for training), 
+    shape (num_inputs, width, height, num_channels)
+    :param train_labels: train labels (all labels to use for training), 
+    shape (num_labels, num_classes)y across batches of the train inputs/labels
+    '''
 
     batch_size = model.batch_size
     accuracies = []
