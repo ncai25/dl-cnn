@@ -186,6 +186,17 @@ class Model(tf.keras.Model):
 #     return np.mean(accuracies)
 
 def train(model, train_inputs, train_labels):
+#     Trains the model on all of the inputs and labels for one epoch. You should shuffle your inputs 
+#     and labels - ensure that they are shuffled in the same order using tf.gather or zipping.
+#     To increase accuracy, you may want to use tf.image.random_flip_left_right on your
+#     inputs before doing the forward pass. You should batch your inputs.
+    
+#     :param model: the initialized model to use for the forward pass and backward pass
+#     :param train_inputs: train inputs (all inputs to use for training), 
+#     shape (num_inputs, width, height, num_channels)
+#     :param train_labels: train labels (all labels to use for training), 
+#     shape (num_labels, num_classes)y across batches of the train inputs/labels
+#     '''
 
     batch_size = model.batch_size
     accuracies = []
@@ -232,7 +243,7 @@ def test(model, test_inputs, test_labels):
 
     for b, b1 in enumerate(range(batch_size, test_inputs.shape[0] + 1), batch_size):
         b0 = b1 - batch_size
-        batch_inputs = test_inputs[b0: b1]
+        batch_inputs = test_inputs[b0:b1]
         batch_labels = test_labels[b0:b1]
         pred_labels = model.call(batch_inputs)
 
@@ -341,14 +352,12 @@ def main():
 
     model = Model()
 
-    for e in range(1, model.epochs):
-        print(f"Epoch {e}")
-        acc = train(model, train_inputs, train_labels)
-        print(f"Training Accuracy: {acc}")
+    for e in range(model.epochs):
+        train_accuracy = train(model, train_inputs, train_labels)
+        print(f"Epoch {e + 1}/{model.epochs}, Training Accuracy: {train_accuracy}")
 
-    test_acc = test(model, test_inputs, test_labels)
-    print(f"Testing Accuracy: {test_acc}")
-
+    test_accuracy = test(model, test_inputs, test_labels)
+    print(f"Test Accuracy: {test_accuracy}")
 
 if __name__ == '__main__':
     main()
