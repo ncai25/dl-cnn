@@ -33,8 +33,6 @@ class Model(tf.keras.Model):
 
         self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001) # tk
 
-
-
         self.conv1_filter = create_variable(5,5,3,16)
         # 5 height, 5 width, 3 input channels, 16 output channels
         # 16 5x5 filters per channel

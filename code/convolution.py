@@ -43,12 +43,23 @@ def conv2d(inputs, filters, strides, padding):
 	if padding == "SAME": # tk else? how to use padding
 		padY = (filter_height - 1)/2 #height
 		padX = (filter_width - 1)/2
+
+		if padX % 2 != 0:
+			pad_width_right = padX + 1
+			pad_width_left = padX
+		else:
+			pad_width_right = padX
+			pad_width_left = padX
+
 		# x_pad = np.pad(x, ((0,0), (2, 2), (2, 2), (0,0)), mode='constant', constant_values = (0,0))
-		inputs = np.pad(inputs,  ((0,0), (math.floor(padY), math.floor(padY)), (math.floor(padX), math.floor(padX)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
+		inputs = np.pad(inputs,  ((0,0), (math.floor(padY), math.floor(padY)), (math.floor(pad_width_left), math.floor(pad_width_right)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
 	else: 
 		padY = 0
 		padX = 0
 	
+
+
+
 	# Calculate output dimensions
 	output_height = int((in_height + 2*padY - filter_height) / strideY + 1)
 	# xOutput = int(((xImgShape - xKernShape + 2 * padding) / strides) + 1)
