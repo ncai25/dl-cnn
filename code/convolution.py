@@ -15,7 +15,7 @@ def conv2d(inputs, filters, strides, padding):
 	:param padding: either "SAME" or "VALID", capitalization matters
 	:return: outputs, Tensor with shape [num_examples, output_height, output_width, output_channels]
 	"""
-	num_examples = inputs.shape[0] # tk: None? 
+	num_examples = inputs.shape[0]  
 	in_height = inputs.shape[1]
 	in_width = inputs.shape[2]
 	input_in_channels = inputs.shape[3]
@@ -39,29 +39,19 @@ def conv2d(inputs, filters, strides, padding):
 	if strides != [1, 1, 1, 1]:
 		raise ValueError("Strides must be [1, 1, 1, 1]")
 	
-	print(f"input in channels: {input_in_channels}, filter_height:{filter_height}, filter_width: {filter_width}")
+	# print(f"input in channels: {input_in_channels}, filter_height:{filter_height}, filter_width: {filter_width}")
 	# Cleaning padding input
 	if padding == "SAME": 
 		padY = (filter_height - 1)/2 #height
 		padX = (filter_width - 1)/2
 
-		# if filter_width % 2 != 0:
-		# 	pad_width_right = padX + 1
-		# 	pad_width_left = padX
-	
-		# if filter_height % 2 != 0:
-		# 	pad_height_bottom = padY + 1
-		# 	pad_height_top = padY
-
-		# x_pad = np.pad(x, ((0,0), (2, 2), (2, 2), (0,0)), mode='constant', constant_values = (0,0))
 		inputs = np.pad(inputs,  ((0,0), (math.floor(padY), math.ceil(padY)), (math.floor(padX), math.ceil(padX)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
-
-		# inputs = np.pad(inputs,  ((0,0), (math.floor(pad_height_top), math.ceil(pad_height_bottom)), (math.floor(pad_width_left), math.ceil(pad_width_right)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
+		# inputs = np.pad(inputs,  ((0,0), (math.floor(pad_height_top), math.floor(pad_height_bottom)), (math.floor(pad_width_left), math.floor(pad_width_right)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
 	else: 
 		padY = 0
 		padX = 0
 	
-	print(f"padY/pad height: {padY}, padX/padWidth: {padX}")
+	# print(f"padY/pad height: {padY}, padX/padWidth: {padX}")
 
 
 	# Calculate output dimensions
@@ -159,22 +149,6 @@ def valid_test_2():
 	my_conv = conv2d(imgs, filters, strides=[1, 1, 1, 1], padding="VALID")
 	tf_conv = tf.nn.conv2d(imgs, filters, [1, 1, 1, 1], padding="VALID")
 	print("VALID_TEST_1:", "my conv2d:", my_conv[0][0], "tf conv2d:", tf_conv[0][0].numpy())
-
-def my_same_test_1():
-	'''
-	Simple test using SAME padding to check out differences between 
-	own convolution function and TensorFlow's convolution function.
-	'''
-	imgs = np.array([[2,2,3,3,3],[0,1,3,0,3],[2,3,0,1,3],[3,3,2,1,2],[3,3,0,2,3]], dtype=np.float32)
-	imgs = np.reshape(imgs, (1,5,5,1))
-	filters = tf.Variable(tf.random.truncated_normal([2, 2, 1, 1],
-								dtype=tf.float32,
-								stddev=1e-1),
-								name="filters")
-	my_conv = conv2d(imgs, filters, strides=[1, 1, 1, 1], padding="SAME")
-	tf_conv = tf.nn.conv2d(imgs, filters, [1, 1, 1, 1], padding="SAME")
-	print("SAME_TEST_0:", "my conv2d:", my_conv[0][0][0].numpy(), "tf conv2d:", tf_conv[0][0][0].numpy())
-
 
 
 def main():

@@ -31,7 +31,7 @@ class Model(tf.keras.Model):
         self.num_classes = 2
         self.loss_list = [] # Append losses to this list in training so you can visualize loss vs time in main
 
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001) # tk
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001)  
 
         self.conv1_filter = create_variable(5,5,3,16)
         # 5 height, 5 width, 3 input channels, 16 output channels
@@ -44,7 +44,7 @@ class Model(tf.keras.Model):
         self.conv3_filter = create_variable(3,3,20,20) 
         self.conv3_bias = create_variable(20)
 
-        self.dense1_weight = create_variable(4 * 4 * 20, 128) #tk
+        self.dense1_weight = create_variable(4 * 4 * 20, 128) 
         self.dense1_bias = create_variable(128)
         self.dense2_weight = create_variable(128, 64)
         self.dense2_bias = create_variable(64)
