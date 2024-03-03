@@ -44,12 +44,12 @@ def conv2d(inputs, filters, strides, padding):
 		padY = (filter_height - 1)/2 #height
 		padX = (filter_width - 1)/2
 		# x_pad = np.pad(x, ((0,0), (2, 2), (2, 2), (0,0)), mode='constant', constant_values = (0,0))
+		inputs = np.pad(inputs,  ((0,0), (math.floor(padY), math.floor(padY)), (math.floor(padX), math.floor(padX)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
+
 	else: 
 		padY = 0
 		padX = 0
 	
-	inputs = np.pad(inputs,  ((0,0), (math.floor(padY), math.floor(padY)), (math.floor(padX), math.floor(padX)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
-
 	# Calculate output dimensions
 	output_height = int((in_height + 2*padY - filter_height) / strideY + 1)
 	# xOutput = int(((xImgShape - xKernShape + 2 * padding) / strides) + 1)
@@ -70,16 +70,14 @@ def conv2d(inputs, filters, strides, padding):
 	for b in range(num_examples):
 		for h in range(output_height): 
 			for w in range(output_width):
-				for i in range(input_in_channels):
-					for o in range(filter_out_channels):
+				for o in range(filter_out_channels):
+					for i in range(input_in_channels):
 						output[b, h, w, o] \
 						+= np.sum(filters[:, :,i, o] * inputs[b, h: h + filter_height, w: w + filter_width, i])
 
 	# output[x, y] = (kernel * imagePadded[x: x + xKernShape, y: y + yKernShape]).sum()
 	print(f"print my conv2d again: {tf.shape(output)}")
 	print(f"my conv2d: {output}")
-
-
 
 	# PLEASE RETURN A TENSOR. HINT: 
 	output = tf.convert_to_tensor(output, dtype = tf.float32)
