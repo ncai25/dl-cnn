@@ -39,6 +39,8 @@ def conv2d(inputs, filters, strides, padding):
 	if strides != [1, 1, 1, 1]:
 		raise ValueError("Strides must be [1, 1, 1, 1]")
 	
+	print(f"input in channels: {input_in_channels}, filter_height:{filter_height}, filter_width: {filter_width}")
+	print(f"padY/pad height: {padY}, padX/padWidth: {padX}")
 	# Cleaning padding input
 	if padding == "SAME": # tk else? how to use padding
 		padY = (filter_height - 1)/2 #height
