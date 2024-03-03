@@ -61,10 +61,8 @@ def conv2d(inputs, filters, strides, padding):
 	#  input_data = np.random.random((4, 100, 3, 2)) -> (4, 100, 2, 16)
 	output = np.zeros((num_examples, output_height, output_width, filter_out_channels))
 	
-	print(f"my conv2d shape: {tf.shape(output)}")
-	print(f"tf.nn.conv2d: {tf.nn.conv2d(inputs, filters, strides, padding)}")
-	print(f"tf.nn.conv2d shape: {tf.shape(tf.nn.conv2d(inputs, filters, strides, padding))}")
-
+	# print(f"my conv2d shape: {tf.shape(output)}")
+	# print(f"tf.nn.conv2d shape: {tf.shape(tf.nn.conv2d(inputs, filters, strides, padding))}")
 
 	for b in range(num_examples):
 		for h in range(output_height): 
@@ -73,13 +71,13 @@ def conv2d(inputs, filters, strides, padding):
 					for i in range(input_in_channels):
 						output[b, h, w, o] \
 						+= np.sum(filters[:, :,i, o] * inputs[b, h: h + filter_height, w: w + filter_width, i])
-
 	# output[x, y] = (kernel * imagePadded[x: x + xKernShape, y: y + yKernShape]).sum()
-	print(f"my conv2d shape again: {tf.shape(output)}")
-	print(f"my conv2d: {output}")
-
+						
 	# PLEASE RETURN A TENSOR. HINT: 
 	output = tf.convert_to_tensor(output, dtype = tf.float32)
+
+	print(f"my conv2d: {output}")
+	print(f"tf.nn.conv2d: {tf.nn.conv2d(inputs, filters, strides, padding)}")
 
 	return output
 def same_test_0():
