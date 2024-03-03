@@ -59,9 +59,12 @@ def conv2d(inputs, filters, strides, padding):
 	output_width = int((in_width + 2*padX - filter_width) / strideX + 1)	
 
 	#  input = [num_examples, in_height, in_width, in_channels]
-	#     input_data = np.random.random((4, 100, 3, 2)) -> (4, 100, 2, 16)
+	#  input_data = np.random.random((4, 100, 3, 2)) -> (4, 100, 2, 16)
 	output = np.zeros((num_examples, output_height, output_width, filter_out_channels))
-	# print(tf.shape(output))
+	print(tf.shape(output))
+	print(num_examples, output_height, output_width, filter_out_channels)
+	print(tf.nn.conv2d(inputs, filters, strides, padding))
+	print(tf.shape(tf.nn.conv2d(inputs, filters, strides, padding)))
 
 	for b in range(num_examples):
 		for h in range(output_height): 
@@ -71,10 +74,9 @@ def conv2d(inputs, filters, strides, padding):
 						output[b, h, w, o] \
 						+= np.sum(filters[:, :,i, o] * inputs[b, h: h + filter_height, w: w + filter_width, i])
 
-# output[x, y] = (kernel * imagePadded[x: x + xKernShape, y: y + yKernShape]).sum()
+	# output[x, y] = (kernel * imagePadded[x: x + xKernShape, y: y + yKernShape]).sum()
 
 	# PLEASE RETURN A TENSOR. HINT: 
-	
 	output = tf.convert_to_tensor(output, dtype = tf.float32)
 
 	return output
@@ -143,11 +145,29 @@ def valid_test_2():
 	tf_conv = tf.nn.conv2d(imgs, filters, [1, 1, 1, 1], padding="VALID")
 	print("VALID_TEST_1:", "my conv2d:", my_conv[0][0], "tf conv2d:", tf_conv[0][0].numpy())
 
+def my_same_test_1():
+	'''
+	Simple test using SAME padding to check out differences between 
+	own convolution function and TensorFlow's convolution function.
+	'''
+	imgs = np.array([[2,2,3,3,3],[0,1,3,0,3],[2,3,0,1,3],[3,3,2,1,2],[3,3,0,2,3]], dtype=np.float32)
+	imgs = np.reshape(imgs, (1,5,5,1))
+	filters = tf.Variable(tf.random.truncated_normal([2, 2, 1, 1],
+								dtype=tf.float32,
+								stddev=1e-1),
+								name="filters")
+	my_conv = conv2d(imgs, filters, strides=[1, 1, 1, 1], padding="SAME")
+	tf_conv = tf.nn.conv2d(imgs, filters, [1, 1, 1, 1], padding="SAME")
+	print("SAME_TEST_0:", "my conv2d:", my_conv[0][0][0].numpy(), "tf conv2d:", tf_conv[0][0][0].numpy())
+
+
+
 def main():
 	# TODO: Add in any tests you may want to use to view the differences between your and TensorFlow's output
-	same_test_0()
-	valid_test_0()
+	# same_test_0()
+	# valid_test_0()
 	valid_test_2()
+
 
 if __name__ == '__main__':
 	main()
