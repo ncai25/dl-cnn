@@ -154,7 +154,6 @@ def train(model, train_inputs, train_labels):
     :param train_labels: train labels (all labels to use for training), 
     shape (num_labels, num_classes)y across batches of the train inputs/labels
     '''
-    print(f"Training model")
     ## Compile out model with all of the required components
     # model.compile(optimizer = model.optimizer, loss = model.loss(), metrics = model.accuracy()) ### am i supposed to do this or is this what I do manually
 
@@ -167,8 +166,6 @@ def train(model, train_inputs, train_labels):
     shuffled_labels = tf.gather(train_labels, indices)
     
     for b, b1 in enumerate(range(batch_size, shuffled_inputs.shape[0] + 1, batch_size), 1):
-        print(f"Batch {b}")
-
         b0 = b1 - batch_size
         batch_inputs = shuffled_inputs[b0: b1]
         batch_inputs = tf.image.random_flip_left_right(batch_inputs)
@@ -184,10 +181,36 @@ def train(model, train_inputs, train_labels):
         model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
         
         batch_acc = model.accuracy(pred_labels, batch_labels)
-        print(f"Batch Accuracy: {batch_acc}")
-
         accuracies.append(batch_acc)
     
+    return np.mean(accuracies)
+
+def train(model, train_inputs, train_labels):
+
+    batch_size = model.batch_size
+    accuracies = []
+
+    indices = tf.random.shuffle(range(0, train_inputs.shape[0])) # range - not just len
+    shuffled_inputs = tf.gather(train_inputs, indices) 
+    shuffled_labels = tf.gather(train_labels, indices)
+
+    for b, b1 in enumerate(range(batch_size, shuffled_inputs.shape[0] + 1, batch_size), 1):
+        b0 = b1 - batch_size
+        batch_inputs = shuffled_inputs[b0:b1]
+        batch_inputs = tf.image.random_flip_left_right(batch_inputs)
+        batch_labels = shuffled_labels[b0:b1]
+
+        with tf.GradientTape() as tape:
+            logits = model.call(batch_inputs) # y_pred
+            loss = model.loss(logits, batch_labels)
+            model.loss_list.append(loss)
+
+        gradients = tape.gradient(loss, model.trainable_variables)
+        model.optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+
+        batch_accuracy = model.accuracy(logits, batch_labels)
+        accuracies.append(batch_accuracy)
+
     return np.mean(accuracies)
 
 
