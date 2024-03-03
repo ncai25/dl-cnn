@@ -49,17 +49,17 @@ def conv2d(inputs, filters, strides, padding):
 		if padX % 2 != 0:
 			pad_width_right = padX + 1
 			pad_width_left = padX
-		else:
-			pad_width_right = padX
-			pad_width_left = padX
+	
+		if padY % 2 != 0:
+			pad_height_bottom = padY + 1
+			pad_height_top = padY
 
 		# x_pad = np.pad(x, ((0,0), (2, 2), (2, 2), (0,0)), mode='constant', constant_values = (0,0))
-		inputs = np.pad(inputs,  ((0,0), (math.floor(padY), math.floor(padY)), (math.floor(pad_width_left), math.floor(pad_width_right)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
+		inputs = np.pad(inputs,  ((0,0), (math.floor(pad_height_top), math.floor(pad_height_bottom)), (math.floor(pad_width_left), math.floor(pad_width_right)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
 	else: 
 		padY = 0
 		padX = 0
 	
-
 
 
 	# Calculate output dimensions
