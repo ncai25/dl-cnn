@@ -65,11 +65,8 @@ class Model(tf.keras.Model):
         # shape of filter = (filter_height, filter_width, in_channels, out_channels)
         # shape of strides = (batch_stride, height_stride, width_stride, channels_stride)
 
-
         conv1 = tf.nn.conv2d(inputs, self.conv1_filter, strides=[1, 2, 2, 1], padding="SAME")
         conv1 = tf.nn.bias_add(conv1, self.conv1_bias)
-        # mean1, var1 = tf.nn.moments(conv1, axes=[0, 1, 2])
-        # conv1 = tf.nn.batch_normalization(conv1, mean1, var1, offset=None, scale=None, variance_epsilon=1e-6)
         conv1 = tf.nn.relu(conv1)
         conv1 = tf.nn.max_pool(conv1, [1, 3, 3, 1],[1, 2, 2, 1], padding="SAME") # batch size + num channels 
 
@@ -101,9 +98,6 @@ class Model(tf.keras.Model):
         dense2 = tf.nn.relu(tf.matmul(dense1, self.dense2_weight) + self.dense2_bias) 
         dense2 = tf.nn.dropout(dense2, 0.3)  
 
-        # dense3 = tf.nn.softmax(tf.matmul(dense2, self.dense3_weight) + self.dense3_bias) 
-        # print(dense3)
-        # negative -> 0 bc of relu 
         dense3 = (tf.matmul(dense2, self.dense3_weight) + self.dense3_bias)
 
         return dense3 # logits

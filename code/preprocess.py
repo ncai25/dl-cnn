@@ -20,7 +20,6 @@ def unpickle(file):
         dict = pickle.load(fo, encoding='bytes')
     return dict
 
-
 def get_data(file_path, first_class, second_class):
     """
     Given a file path and two target classes, returns an array of 
@@ -47,11 +46,6 @@ def get_data(file_path, first_class, second_class):
     inputs = unpickled_file[b'data']
     labels = unpickled_file[b'labels']
     # TODO: Do the rest of preprocessing! 
-
-    # indices = [index for index, label in enumerate(labels) if (label == first_class or label == second_class)]
-
-    # inputs = np.array([inputs[index] for index in indices])
-    # labels = np.array([labels[index] for index in indices])
 
     inputs_numpy = np.array(inputs)
     labels_numpy = np.array(labels)

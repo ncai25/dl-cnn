@@ -31,8 +31,6 @@ def conv2d(inputs, filters, strides, padding):
 	channels_stride = strides[3]
 
 	strides = [num_examples_stride, strideY, strideX, channels_stride]
-	# inputs.shape = [num_examples, in_height, in_width, input_in_channels]
-	# filter.shape = [filter_height, filter_width, filter_in_channels, filter_out_channels]
 	
 	assert(input_in_channels == filter_in_channels), "Number of input channels must match number of filter channels"
 
@@ -46,13 +44,11 @@ def conv2d(inputs, filters, strides, padding):
 		padX = (filter_width - 1)/2
 
 		inputs = np.pad(inputs,  ((0,0), (math.floor(padY), math.ceil(padY)), (math.floor(padX), math.ceil(padX)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
-		# inputs = np.pad(inputs,  ((0,0), (math.floor(pad_height_top), math.floor(pad_height_bottom)), (math.floor(pad_width_left), math.floor(pad_width_right)), (0,0)), mode='constant', constant_values = (0,0))  #tk 
 	else: 
 		padY = 0
 		padX = 0
 	
 	# print(f"padY/pad height: {padY}, padX/padWidth: {padX}")
-
 
 	# Calculate output dimensions
 	output_height = int((in_height + 2*padY - filter_height) / strideY + 1)
@@ -156,7 +152,6 @@ def main():
 	# same_test_0()
 	# valid_test_0()
 	valid_test_2()
-
 
 if __name__ == '__main__':
 	main()
